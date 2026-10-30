@@ -16,7 +16,7 @@ import { inputDate, parseDate, prepareTrip, validateTrip } from '../lib/trip-uti
 import { colors, shared } from '../lib/theme';
 import { Screen, Button, Icon, showError, confirmDelete } from './UI';
 import TripMap from './TripMap';
-
+import LocationButton from './LocationButton';
 import { PhotoButtons, PhotoGrid } from './Photos';
 
 type Props = { original?: Trip; initialStopId?: string; initialEntryId?: string };
@@ -158,6 +158,11 @@ export default function TripForm({ original, initialStopId, initialEntryId }: Pr
           />
         </View>
       </View>
+      <LocationButton
+        key={stop.id}
+        disabled={saving}
+        onSelect={(place) => updateStop(place)}
+      />
       <Text style={shared.label}>KURZER TEXT / NOTIZ</Text>
       <TextInput
         accessibilityLabel="Kurzer Text oder Notiz"

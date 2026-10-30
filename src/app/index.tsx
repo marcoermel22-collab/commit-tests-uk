@@ -1,42 +1,50 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { EmptyState, Icon, Screen } from '../components/UI';
+import { useTrips } from '../state/TripContext';
+import { displayDate, filterTrips } from '../lib/trip-utils';
 import { colors, shared } from '../lib/theme';
 
-const examples = [
-  { title: 'Ein Wochenende in Bern', route: 'Bern → Thun', date: '24.–26. Oktober 2026' },
-  { title: 'Sommer am See', route: 'Luzern → Weggis', date: '12.–14. Juli 2026' },
-];
-
-export default function Preview() {
-  const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState<string | null>(null);
+export default function TripsScreen() {
+  const { trips } = useTrips();
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState('Alle');
+  const tags = ['Alle', ...new Set(trips.map((trip) => trip.tag).filter(Boolean))];
+  const visible = filterTrips(trips, query, filter).sort((a, b) => b.startDate.localeCompare(a.startDate));
   return (
-    <SafeAreaView style={styles.page}>
-      <View style={styles.content}>
-        <Text style={shared.eyebrow}>MEINE ERINNERUNGEN</Text>
-        <Text style={shared.title}>Pin Map</Text>
-        <Text style={styles.intro}>Kleine Auszeiten. Grosse Erinnerungen.</Text>
-        <TextInput accessibilityLabel="Beispielreisen suchen" placeholder="Reise suchen" value={search} onChangeText={setSearch} style={shared.input} />
-        {examples.filter((item) => item.title.toLowerCase().includes(search.toLowerCase())).map((item) => (
-          <Pressable key={item.title} accessibilityRole="button" onPress={() => setSelected(selected === item.title ? null : item.title)} style={styles.card}>
-            <Text style={styles.route}>{item.route}</Text>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={shared.small}>{item.date}</Text>
-            {selected === item.title && <Text style={styles.intro}>Deine Reiseorte und Erinnerungen finden hier ihren Platz.</Text>}
-          </Pressable>
-        ))}
-        <Text style={styles.note}>Oberflaechenentwurf mit Beispieldaten. Eigene Reisen und dauerhafte Speicherung folgen.</Text>
+    <Screen tab="trips">
+      <View style={styles.heading}>
+        <View><Text style={shared.eyebrow}>MEINE ERINNERUNGEN</Text><Text style={shared.title}>Pin Map</Text></View>
+        
       </View>
-    </SafeAreaView>
+      <Text style={styles.intro}>Deine Reisen. Ort fuer Ort.</Text>
+      <TextInput accessibilityLabel="Reisen durchsuchen" placeholder="Reisen, Orte oder Kategorien suchen" value={query} onChangeText={setQuery} style={shared.input} />
+      <View style={styles.filters}>{tags.map((tag) => <Pressable key={tag} accessibilityRole="button" accessibilityState={{ selected: filter === tag }} onPress={() => setFilter(tag)} style={[styles.chip, filter === tag && styles.active]}><Text style={{ color: filter === tag ? 'white' : colors.text }}>{tag}</Text></Pressable>)}</View>
+      <Text style={styles.count}>{visible.length} {visible.length === 1 ? 'Reise' : 'Reisen'}</Text>
+      {visible.map((trip) => <View key={trip.id} style={styles.card}>
+        <View style={styles.route}><Icon name="navigate-outline" color="#53695B" /><Text style={styles.routeText} numberOfLines={2}>{trip.stops.map((stop) => stop.name).join(' → ')}</Text></View>
+        <Text style={styles.title}>{trip.title}</Text>
+        <Text style={shared.small}>{displayDate(trip.startDate)} – {displayDate(trip.endDate)}</Text>
+        <View style={styles.footer}><Text style={styles.badge}>{trip.tag || 'Reise'}</Text><Text style={shared.small}>{trip.stops.length} Orte</Text></View>
+      </View>)}
+      {!visible.length && <EmptyState title={trips.length ? 'Keine Reise gefunden' : 'Deine erste Reise'} text={trips.length ? 'Versuche einen anderen Suchbegriff.' : 'Halte deinen ersten Reiseverlauf fest.'} />}
+      {trips.some((trip) => trip.id.startsWith('demo-')) && <Text style={styles.note}>Beispielreisen zur Vorschau · Du kannst sie bearbeiten oder loeschen.</Text>}
+    </Screen>
   );
 }
 const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: colors.background },
-  content: { width: '100%', maxWidth: 700, alignSelf: 'center', padding: 24, gap: 18 },
-  intro: { fontSize: 15, lineHeight: 23, color: '#58645D' },
-  card: { backgroundColor: 'white', borderRadius: 24, padding: 24, gap: 12, borderWidth: 1, borderColor: colors.border },
-  route: { fontSize: 13, fontWeight: '700', color: '#65766A' },
-  title: { fontSize: 23, fontWeight: '700', color: colors.text },
-  note: { color: '#707774', fontSize: 12, lineHeight: 20 },
+  heading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
+  intro: { fontSize: 16, color: '#657169', marginTop: 10, marginBottom: 24 },
+  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginVertical: 16 },
+  chip: { paddingHorizontal: 16, paddingVertical: 9, borderRadius: 24, backgroundColor: 'white', borderWidth: 1, borderColor: colors.border },
+  active: { backgroundColor: colors.dark, borderColor: colors.dark },
+  count: { color: colors.muted, fontSize: 12, marginBottom: 12 },
+  card: { padding: 22, backgroundColor: 'white', borderRadius: 24, marginBottom: 14, borderWidth: 1, borderColor: '#E8E9E1', gap: 12 },
+  route: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#EEF2EB', padding: 14, borderRadius: 15 },
+  routeText: { color: '#53695B', fontWeight: '600', flex: 1, fontSize: 14 },
+  title: { color: colors.text, fontSize: 23, fontWeight: '700' },
+  footer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
+  badge: { backgroundColor: '#F1F0EB', color: '#59635C', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 8, fontSize: 12 },
+  note: { textAlign: 'center', color: colors.muted, fontSize: 11, lineHeight: 18, marginTop: 10 },
 });

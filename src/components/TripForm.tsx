@@ -68,7 +68,7 @@ export default function TripForm({ original }: Props) {
     setSaving(true);
     try {
       await saveTrip(next);
-      router.replace('/');
+      router.replace({ pathname: '/trip/[id]', params: { id: next.id } });
     } catch (error) {
       showError(error instanceof Error ? error.message : 'Die Reise konnte nicht gespeichert werden.');
     } finally { setSaving(false); }

@@ -22,12 +22,12 @@ export default function TripsScreen() {
       <TextInput accessibilityLabel="Reisen durchsuchen" placeholder="Reisen, Orte oder Kategorien suchen" value={query} onChangeText={setQuery} style={shared.input} />
       <View style={styles.filters}>{tags.map((tag) => <Pressable key={tag} accessibilityRole="button" accessibilityState={{ selected: filter === tag }} onPress={() => setFilter(tag)} style={[styles.chip, filter === tag && styles.active]}><Text style={{ color: filter === tag ? 'white' : colors.text }}>{tag}</Text></Pressable>)}</View>
       <Text style={styles.count}>{visible.length} {visible.length === 1 ? 'Reise' : 'Reisen'}</Text>
-      {visible.map((trip) => <View key={trip.id} style={styles.card}>
+      {visible.map((trip) => <Pressable key={trip.id} accessibilityRole="button" accessibilityLabel={`Reise oeffnen: ${trip.title}`} onPress={() => router.push({ pathname: '/trip/[id]', params: { id: trip.id } })} style={styles.card}>
         <View style={styles.route}><Icon name="navigate-outline" color="#53695B" /><Text style={styles.routeText} numberOfLines={2}>{trip.stops.map((stop) => stop.name).join(' → ')}</Text></View>
         <Text style={styles.title}>{trip.title}</Text>
         <Text style={shared.small}>{displayDate(trip.startDate)} – {displayDate(trip.endDate)}</Text>
-        <View style={styles.footer}><Text style={styles.badge}>{trip.tag || 'Reise'}</Text><Text style={shared.small}>{trip.stops.length} Orte</Text></View>
-      </View>)}
+        <View style={styles.footer}><Text style={styles.badge}>{trip.tag || 'Reise'}</Text><Text style={shared.small}>{trip.stops.length} Orte · Details →</Text></View>
+      </Pressable>)}
       {!visible.length && <EmptyState title={trips.length ? 'Keine Reise gefunden' : 'Deine erste Reise'} text={trips.length ? 'Versuche einen anderen Suchbegriff.' : 'Halte deinen ersten Reiseverlauf fest.'} action={<Button title="Reise erfassen" onPress={() => router.push('/create')} />} />}
       {trips.some((trip) => trip.id.startsWith('demo-')) && <Text style={styles.note}>Beispielreisen zur Vorschau · Du kannst sie bearbeiten oder loeschen.</Text>}
     </Screen>

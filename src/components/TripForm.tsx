@@ -1,7 +1,8 @@
+import { PhotoButtons, PhotoGrid } from './Photos';
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
-import { emptyStop, emptyTrip, type Trip, type Stop } from '../types/trip';
+import { createId, emptyStop, emptyTrip, type Trip, type Stop } from '../types/trip';
 import { useTrips } from '../state/TripContext';
 import { inputDate, parseDate, validateTrip } from '../lib/trip-utils';
 import { shared } from '../lib/theme';
@@ -44,6 +45,15 @@ export default function TripForm({ original }: Props) {
   function parseCoordinate(value: string | undefined) {
     return value?.trim() ? Number(value.replace(',', '.')) : NaN;
   }
+  const photos = draft.stops[0].entries[0]?.photos ?? [];
+  function updatePhotos(photos: string[]) {
+    setDraft((current) => {
+      const stop = current.stops[0];
+      const entry = stop.entries[0] ?? { id: createId(), title: 'Meine Erinnerung', date: parseDate(start) ?? current.startDate, text: '', photos: [] };
+      const entries = !photos.length && !entry.text.trim() ? stop.entries.slice(1) : [{ ...entry, photos }, ...stop.entries.slice(1)];
+      return { ...current, stops: [{ ...stop, entries }, ...current.stops.slice(1)] };
+    });
+  }
   async function save() {
     if (saving) return;
     const startDate = parseDate(start);
@@ -59,6 +69,7 @@ export default function TripForm({ original }: Props) {
       stops: draft.stops.map((stop) => ({
         ...stop,
         name: stop.name.trim(),
+        entries: stop.entries.map((entry) => !original ? { ...entry, date: startDate, title: entry.title === 'Meine Erinnerung' ? draft.title.trim() : entry.title } : entry),
         latitude: parseCoordinate(coordinates[stop.id]?.latitude),
         longitude: parseCoordinate(coordinates[stop.id]?.longitude),
       })),
@@ -98,6 +109,7 @@ export default function TripForm({ original }: Props) {
         <TextInput accessibilityLabel={`Laengengrad ${index + 1}`} value={coordinates[stop.id]?.longitude ?? ''} onChangeText={(value) => updateCoordinate(stop.id, 'longitude', value)} placeholder="z. B. 7.4474" style={shared.input} />
       </View>)}
       <Button secondary title="Zwischenstopp hinzufuegen" onPress={() => setDraft((current) => ({ ...current, stops: [...current.stops.slice(0, -1), emptyStop(), current.stops[current.stops.length - 1]] }))} />
+<Text style={shared.label}>FOTOS</Text><PhotoGrid photos={photos} onRemove={(uri) => updatePhotos(photos.filter((photo) => photo !== uri))} /><PhotoButtons onAdd={(added) => updatePhotos([...photos, ...added])} />
       <Button title="Reise speichern" loading={saving} onPress={() => void save()} style={{ marginTop: 20 }} />
     </Screen>
   );

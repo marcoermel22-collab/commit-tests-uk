@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-
-import { EmptyState, Icon, Screen } from '../components/UI';
+import { router } from 'expo-router';
+import { Button, EmptyState, Icon, Screen } from '../components/UI';
 import { useTrips } from '../state/TripContext';
 import { displayDate, filterTrips } from '../lib/trip-utils';
 import { colors, shared } from '../lib/theme';
@@ -16,7 +16,7 @@ export default function TripsScreen() {
     <Screen tab="trips">
       <View style={styles.heading}>
         <View><Text style={shared.eyebrow}>MEINE ERINNERUNGEN</Text><Text style={shared.title}>Pin Map</Text></View>
-        
+        <Button title="+ Erfassen" onPress={() => router.push('/create')} />
       </View>
       <Text style={styles.intro}>Deine Reisen. Ort fuer Ort.</Text>
       <TextInput accessibilityLabel="Reisen durchsuchen" placeholder="Reisen, Orte oder Kategorien suchen" value={query} onChangeText={setQuery} style={shared.input} />
@@ -28,7 +28,7 @@ export default function TripsScreen() {
         <Text style={shared.small}>{displayDate(trip.startDate)} – {displayDate(trip.endDate)}</Text>
         <View style={styles.footer}><Text style={styles.badge}>{trip.tag || 'Reise'}</Text><Text style={shared.small}>{trip.stops.length} Orte</Text></View>
       </View>)}
-      {!visible.length && <EmptyState title={trips.length ? 'Keine Reise gefunden' : 'Deine erste Reise'} text={trips.length ? 'Versuche einen anderen Suchbegriff.' : 'Halte deinen ersten Reiseverlauf fest.'} />}
+      {!visible.length && <EmptyState title={trips.length ? 'Keine Reise gefunden' : 'Deine erste Reise'} text={trips.length ? 'Versuche einen anderen Suchbegriff.' : 'Halte deinen ersten Reiseverlauf fest.'} action={<Button title="Reise erfassen" onPress={() => router.push('/create')} />} />}
       {trips.some((trip) => trip.id.startsWith('demo-')) && <Text style={styles.note}>Beispielreisen zur Vorschau · Du kannst sie bearbeiten oder loeschen.</Text>}
     </Screen>
   );

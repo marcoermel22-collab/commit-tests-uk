@@ -94,6 +94,12 @@ export function BottomNav({ active }: { active: 'trips' | 'map' | 'new' }) {
   const insets = useSafeAreaInsets();
   const items = [
     { key: 'trips', title: 'Reisen', icon: 'grid' as const, path: '/' as const },
+    {
+      key: 'new',
+      title: 'Neu',
+      icon: 'ellipse-outline' as const,
+      path: '/create' as const,
+    },
   ];
   return (
     <View

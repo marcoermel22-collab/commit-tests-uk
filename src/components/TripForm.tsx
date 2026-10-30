@@ -1,3 +1,4 @@
+import DateInput from './DateInput';
 import { useState } from 'react';
 import {
   Modal,
@@ -145,16 +146,13 @@ export default function TripForm({ original, initialStopId, initialEntryId }: Pr
         </View>
         <View style={{ flex: 1 }}>
           <Text style={shared.label}>DATUM *</Text>
-          <TextInput
+          <DateInput
             accessibilityLabel="Startdatum"
             value={date}
             onChangeText={(value) => {
               if (endDate === date) setEndDate(value);
               setDate(value);
             }}
-            placeholder="TT.MM.JJJJ"
-            style={shared.input}
-            keyboardType="numbers-and-punctuation"
           />
         </View>
       </View>
@@ -267,12 +265,10 @@ export default function TripForm({ original, initialStopId, initialEntryId }: Pr
               um seinen Kartenmarker im Formular anzupassen.
             </Text>
             <Text style={shared.label}>REISEENDE *</Text>
-            <TextInput
+            <DateInput
               accessibilityLabel="Enddatum"
               value={endDate}
               onChangeText={setEndDate}
-              placeholder="TT.MM.JJJJ"
-              style={shared.input}
             />
             {draft.stops.map((item, index) => (
               <View

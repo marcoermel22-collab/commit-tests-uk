@@ -1,3 +1,4 @@
+import DateInput from './DateInput';
 import { useState } from 'react';
 import {
   Modal,
@@ -127,12 +128,10 @@ export default function EntryEditor({ trip, stopId, entry, onClose, onSaved }: P
             placeholder="Unser erster Abend"
           />
           <Text style={shared.label}>DATUM *</Text>
-          <TextInput
+          <DateInput
             accessibilityLabel="Datum des Tagebucheintrags"
             value={date}
             onChangeText={setDate}
-            style={shared.input}
-            placeholder="TT.MM.JJJJ"
           />
           <Text style={shared.label}>STANDORT *</Text>
           <View style={styles.stops}>
